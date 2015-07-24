@@ -25,7 +25,7 @@ class checker : private boost::noncopyable {
    public:
     virtual ~result_mapper() {}
 
-    virtual problem::single::result::Judge::Status map(int exit_status) = 0;
+    virtual problem::single::JudgeResult::Status map(int exit_status) = 0;
   };
   BUNSAN_PLUGIN_TYPES(result_mapper)
 
@@ -40,7 +40,7 @@ class checker : private boost::noncopyable {
   virtual ~checker() {}
 
   virtual bool check(const file_map &test_files, const file_map &solution_files,
-                     problem::single::result::Judge &result) = 0;
+                     problem::single::JudgeResult &result) = 0;
 };
 BUNSAN_PLUGIN_TYPES(checker)
 

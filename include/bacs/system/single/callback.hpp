@@ -12,8 +12,8 @@ namespace callback {
 
 using system::callback::message_interface;
 
-using intermediate = message_interface<problem::single::intermediate::Result>;
-using result = message_interface<problem::single::result::Result>;
+using intermediate = message_interface<problem::single::IntermediateResult>;
+using result = message_interface<problem::single::Result>;
 
 }  // namespace callback
 }  // namespace single

@@ -23,7 +23,7 @@ class tester : private boost::noncopyable {
     BUNSAN_PLUGIN_AUTO_BODY(result_mapper)
    public:
     virtual ~result_mapper() {}
-    virtual problem::single::result::Judge::Status map(int exit_status) = 0;
+    virtual problem::single::JudgeResult::Status map(int exit_status) = 0;
   };
   BUNSAN_PLUGIN_TYPES(result_mapper)
 
@@ -41,7 +41,7 @@ class tester : private boost::noncopyable {
 
   virtual bool test(const problem::single::process::Settings &settings,
                     const test::storage::test &test,
-                    problem::single::result::TestResult &result) = 0;
+                    problem::single::TestResult &result) = 0;
 };
 BUNSAN_PLUGIN_TYPES(tester)
 
