@@ -11,7 +11,9 @@ else()
 endif()
 
 bunsan_add_library(${PROJECT_NAME}
+    src/test/storage.cpp
 )
+bunsan_use_bunsan_package(${PROJECT_NAME} bunsan_bacs_problem_single bunsan_bacs_problem_single)
 bunsan_use_bunsan_package(${PROJECT_NAME} bunsan_bacs_system bunsan_bacs_system)
 
 bunsan_install_headers()
