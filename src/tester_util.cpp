@@ -88,35 +88,55 @@ void tester_util::set_test_files(
   }
 }
 
+void tester_util::add_test_file(const problem::single::process::File &file,
+                                const test::storage::test &test,
+                                const boost::filesystem::path &destination,
+                                const unistd::access::Id &owner_id,
+                                const mode_t mask) {
+  try {
+    BOOST_ASSERT(destination.is_absolute());
+    if (m_solution_files.find(file.id()) != m_solution_files.end()) {
+      BOOST_THROW_EXCEPTION(error() << error::message("Duplicate file ids."));
+    }
+    // note: strip to filename
+    const boost::filesystem::path location = m_solution_files[file.id()] =
+        destination / (file.has_path()
+                           ? bacs::file::path_cast(file.path()).filename()
+                           : boost::filesystem::unique_path());
+    m_container_solution_files[file.id()] =
+        m_container->filesystem().keepInRoot(location);
+    const mode_t mode = file::mode(file.permission()) & mask;
+    if (file.has_init()) {
+      copy_test_file(test, file.init(), location, owner_id, mode);
+    } else {
+      touch_test_file(location, owner_id, mode);
+    }
+    if (file.has_receive())
+      m_receive.push_back({file.id(), location, file.receive()});
+  } catch (std::exception &) {
+    BOOST_THROW_EXCEPTION(add_test_file_error()
+                          << bunsan::enable_nested_current());
+  }
+}
+
+void tester_util::set_test(const test::storage::test &test) {
+  try {
+    for (const std::string &data_id : test.data_set()) {
+      m_test_files[data_id] = test.location(data_id);
+    }
+  } catch (std::exception &) {
+    BOOST_THROW_EXCEPTION(set_test_error() << bunsan::enable_nested_current());
+  }
+}
+
 void tester_util::add_test_files(
     const problem::single::process::Settings &settings,
     const test::storage::test &test, const boost::filesystem::path &destination,
     const unistd::access::Id &owner_id, const mode_t mask) {
   try {
-    BOOST_ASSERT(destination.is_absolute());
-
-    for (const std::string &data_id : test.data_set())
-      m_test_files[data_id] = test.location(data_id);
-
+    set_test(test);
     for (const problem::single::process::File &file : settings.file()) {
-      if (m_solution_files.find(file.id()) != m_solution_files.end()) {
-        BOOST_THROW_EXCEPTION(error() << error::message("Duplicate file ids."));
-      }
-      // note: strip to filename
-      const boost::filesystem::path location = m_solution_files[file.id()] =
-          destination / (file.has_path()
-                             ? bacs::file::path_cast(file.path()).filename()
-                             : boost::filesystem::unique_path());
-      m_container_solution_files[file.id()] =
-          m_container->filesystem().keepInRoot(location);
-      const mode_t mode = file::mode(file.permission()) & mask;
-      if (file.has_init()) {
-        copy_test_file(test, file.init(), location, owner_id, mode);
-      } else {
-        touch_test_file(location, owner_id, mode);
-      }
-      if (file.has_receive())
-        m_receive.push_back({file.id(), location, file.receive()});
+      add_test_file(file, test, destination, owner_id, mask);
     }
   } catch (std::exception &) {
     BOOST_THROW_EXCEPTION(add_test_files_error()

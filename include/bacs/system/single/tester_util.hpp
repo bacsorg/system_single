@@ -85,6 +85,15 @@ class tester_util : private tester_util_mkdir_hook {
                       const boost::filesystem::path &destination,
                       const unistd::access::Id &owner_id, mode_t mask = 0777);
 
+  struct set_test_error : virtual error {};
+  void set_test(const test::storage::test &test);
+
+  struct add_test_file_error : virtual error {};
+  void add_test_file(const problem::single::process::File &file,
+                     const test::storage::test &test,
+                     const boost::filesystem::path &destination,
+                     const unistd::access::Id &owner_id, mode_t mask = 0777);
+
   struct add_test_files_error : virtual error {};
   void add_test_files(const problem::single::process::Settings &settings,
                       const test::storage::test &test,
