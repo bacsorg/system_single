@@ -21,7 +21,7 @@ namespace single {
 class checker : private boost::noncopyable {
  public:
   class result_mapper : private boost::noncopyable {
-    BUNSAN_PLUGIN_AUTO_BODY(result_mapper)
+    BUNSAN_PLUGIN_AUTO_BODY_NESTED(checker, result_mapper)
    public:
     virtual ~result_mapper() {}
 

@@ -20,7 +20,7 @@ namespace single {
 class tester : private boost::noncopyable {
  public:
   class result_mapper : private boost::noncopyable {
-    BUNSAN_PLUGIN_AUTO_BODY(result_mapper)
+    BUNSAN_PLUGIN_AUTO_BODY_NESTED(tester, result_mapper)
    public:
     virtual ~result_mapper() {}
     virtual problem::single::JudgeResult::Status map(int exit_status) = 0;
