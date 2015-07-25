@@ -8,6 +8,9 @@ namespace single {
 
 struct error : virtual bacs::system::error {};
 
+struct profile_error : virtual error {};
+struct profile_extension_error : virtual profile_error {};
+
 struct test_group_error : virtual error {
   using test_group = boost::error_info<struct tag_test_group, std::string>;
 };

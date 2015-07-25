@@ -22,7 +22,7 @@ class worker {
          test::storage_uptr tests, tester_uptr tester);
 
   void test(const bacs::process::Buildable &solution,
-            const problem::single::ProfileExtension &profile);
+            const problem::Profile &profile);
 
  private:
   bool check_hash();

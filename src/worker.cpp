@@ -26,8 +26,14 @@ worker::worker(const problem::single::Task::Callbacks &callbacks,
 }
 
 void worker::test(const bacs::process::Buildable &solution,
-                  const problem::single::ProfileExtension &profile) {
-  check_hash() && build(solution) && test(profile);
+                  const problem::Profile &profile) {
+  problem::single::ProfileExtension extension;
+  if (!profile.extension().UnpackTo(&extension)) {
+    BOOST_THROW_EXCEPTION(profile_extension_error()
+                          << profile_extension_error::message(
+                              "Unable to unpack profile extension"));
+  }
+  check_hash() && build(solution) && test(extension);
   send_result();
 }
 
