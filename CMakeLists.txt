@@ -13,6 +13,7 @@ endif()
 bunsan_add_library(${PROJECT_NAME}
     src/file.cpp
     src/test/storage.cpp
+    src/tester_util.cpp
     src/worker.cpp
 )
 bunsan_use_bunsan_package(${PROJECT_NAME} bunsan_bacs_problem_single bunsan_bacs_problem_single)
