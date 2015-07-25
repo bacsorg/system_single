@@ -247,25 +247,6 @@ void tester_util::send_test_files(bacs::problem::single::TestResult &result) {
   }
 }
 
-tester_util::Pipe tester_util::create_pipe() {
-  try {
-    return m_process_group->createPipe();
-  } catch (std::exception &) {
-    BOOST_THROW_EXCEPTION(create_pipe_error()
-                          << bunsan::enable_nested_current());
-  }
-}
-
-tester_util::Pipe::End tester_util::add_notifier(
-    const NotificationStream::Protocol protocol) {
-  try {
-    return m_process_group->addNotifier(protocol);
-  } catch (std::exception &) {
-    BOOST_THROW_EXCEPTION(add_notifier_error()
-                          << bunsan::enable_nested_current());
-  }
-}
-
 void tester_util::redirect(const ProcessPointer &from, const int from_fd,
                            const ProcessPointer &to, const int to_fd) {
   try {

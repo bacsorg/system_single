@@ -132,10 +132,25 @@ class tester_util : private tester_util_mkdir_hook {
   void send_test_files(bacs::problem::single::TestResult &result);
 
   struct create_pipe_error : virtual error {};
-  Pipe create_pipe();
+  Pipe create_pipe() {
+    try {
+      return m_process_group->createPipe();
+    } catch (std::exception &) {
+      BOOST_THROW_EXCEPTION(create_pipe_error()
+                            << bunsan::enable_nested_current());
+    }
+  }
 
   struct add_notifier_error : virtual error {};
-  Pipe::End add_notifier(const NotificationStream::Protocol protocol);
+  template <typename... Args>
+  Pipe::End add_notifier(Args &&... args) {
+    try {
+      return m_process_group->addNotifier(std::forward<Args>(args)...);
+    } catch (std::exception &) {
+      BOOST_THROW_EXCEPTION(add_notifier_error()
+                            << bunsan::enable_nested_current());
+    }
+  }
 
   struct redirect_error : virtual error {};
   void redirect(const ProcessPointer &from, int from_fd,
