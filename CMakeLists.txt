@@ -11,6 +11,7 @@ else()
 endif()
 
 bunsan_add_library(${PROJECT_NAME}
+    src/check.cpp
     src/file.cpp
     src/main.cpp
     src/test/storage.cpp
