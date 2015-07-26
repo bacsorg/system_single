@@ -27,6 +27,9 @@ bunsan_use_bunsan_package(${PROJECT_NAME} bunsan_bacs_system
 bunsan_use_bunsan_package(${PROJECT_NAME} bunsan_protobuf
     bunsan_protobuf
 )
+bunsan_use_bunsan_package(${PROJECT_NAME} bunsan_broker
+    bunsan_broker
+)
 
 bunsan_install_headers()
 bunsan_install_targets(${PROJECT_NAME})

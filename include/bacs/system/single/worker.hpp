@@ -1,11 +1,13 @@
 #pragma once
 
-#include <bacs/system/single/callback.hpp>
 #include <bacs/system/single/test/storage.hpp>
 #include <bacs/system/single/tester.hpp>
 
+#include <bacs/problem/single/intermediate.pb.h>
 #include <bacs/problem/single/problem.pb.h>
 #include <bacs/problem/single/result.pb.h>
+
+#include <bunsan/broker/task/channel.hpp>
 
 namespace bacs {
 namespace system {
@@ -18,8 +20,8 @@ class worker {
   static const boost::filesystem::path PROBLEM_LIB;
 
  public:
-  worker(const problem::single::Task::Callbacks &callbacks,
-         test::storage_uptr tests, tester_uptr tester);
+  worker(bunsan::broker::task::channel &channel, test::storage_uptr tests,
+         tester_uptr tester);
 
   void test(const bacs::process::Buildable &solution,
             const problem::Profile &profile);
@@ -52,10 +54,11 @@ class worker {
             const std::string &test_id, problem::single::TestResult &result);
 
  private:
+  bunsan::broker::task::channel &m_channel;
   test::storage_uptr m_tests;
   tester_uptr m_tester;
-  callback::result m_result_cb;
-  callback::intermediate m_intermediate_cb;
+  bunsan::broker::Status m_broker_status;
+  bunsan::broker::Result m_broker_result;
   problem::single::IntermediateResult m_intermediate;
   problem::single::Result m_result;
 };

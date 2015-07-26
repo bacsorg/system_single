@@ -12,6 +12,7 @@
 #include <yandex/contest/system/Trace.hpp>
 #include <yandex/contest/TypeInfo.hpp>
 
+#include <bunsan/broker/task/stream_channel.hpp>
 #include <bunsan/protobuf/binary.hpp>
 
 #include <iostream>
@@ -52,11 +53,10 @@ static ContainerConfig container_config(ContainerConfig config) {
   return config;
 }
 
-int main(std::istream &in, std::ostream & /*out*/) {
+int main(std::istream &in, std::ostream &out) {
   try {
     yandex::contest::system::Trace::handle(SIGABRT);
-    const auto task =
-        bunsan::protobuf::binary::parse_make<problem::single::Task>(in);
+    bunsan::broker::task::stream_channel channel(out);
     auto tests_plugin =
         test::storage::load_plugin("lib/bacs_single_system_test_storage");
     auto checker_mapper_plugin = checker::result_mapper::load_plugin(
@@ -75,8 +75,10 @@ int main(std::istream &in, std::ostream & /*out*/) {
     auto tester_mapper = tester_mapper_plugin.unique_instance();
     auto tester = tester_plugin.unique_instance(
         container, std::move(tester_mapper), std::move(checker));
-    bacs::system::single::worker worker(task.callbacks(), std::move(tests),
+    bacs::system::single::worker worker(channel, std::move(tests),
                                         std::move(tester));
+    const auto task =
+        bunsan::protobuf::binary::parse_make<problem::single::Task>(in);
     worker.test(task.solution(), task.profile());
     return 0;
   } catch (std::exception &e) {

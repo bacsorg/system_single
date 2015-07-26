@@ -2,9 +2,12 @@
 
 #include <bacs/system/single/error.hpp>
 
+#include <bunsan/protobuf/binary.hpp>
+
 #include <boost/algorithm/string/classification.hpp>
 #include <boost/filesystem/operations.hpp>
 #include <boost/filesystem/path.hpp>
+#include <boost/lexical_cast.hpp>
 #include <boost/scope_exit.hpp>
 
 #include <algorithm>
@@ -16,11 +19,11 @@ namespace bacs {
 namespace system {
 namespace single {
 
-worker::worker(const problem::single::Task::Callbacks &callbacks,
-               test::storage_uptr tests, tester_uptr tester)
-    : m_tests(std::move(tests)), m_tester(std::move(tester)) {
-  if (callbacks.has_intermediate())
-    m_intermediate_cb.assign(callbacks.intermediate());
+worker::worker(bunsan::broker::task::channel &channel, test::storage_uptr tests,
+               tester_uptr tester)
+    : m_channel(channel),
+      m_tests(std::move(tests)),
+      m_tester(std::move(tester)) {
   m_intermediate.set_state(problem::single::IntermediateResult::INITIALIZED);
   send_intermediate();
 }
@@ -55,9 +58,19 @@ bool worker::test(const problem::single::ProfileExtension &profile) {
   return true;
 }
 
-void worker::send_intermediate() { m_intermediate_cb.call(m_intermediate); }
+void worker::send_intermediate() {
+  m_broker_status.set_code(0);
+  m_broker_status.clear_reason();
+  m_broker_status.set_data(bunsan::protobuf::binary::to_string(m_result));
+  m_channel.send_status(m_broker_status);
+}
 
-void worker::send_result() { m_result_cb.call(m_result); }
+void worker::send_result() {
+  m_broker_result.set_status(bunsan::broker::Result::OK);
+  m_broker_result.clear_reason();
+  m_broker_result.set_data(bunsan::protobuf::binary::to_string(m_result));
+  m_channel.send_result(m_broker_result);
+}
 
 namespace {
 bool satisfies_requirement(
