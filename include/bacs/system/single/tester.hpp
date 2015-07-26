@@ -33,7 +33,6 @@ class tester : private boost::noncopyable {
       result_mapper_uptr mapper, checker_uptr checker)
 
  public:
-  explicit tester();
   virtual ~tester() {}
 
   virtual bool build(const bacs::process::Buildable &solution,
