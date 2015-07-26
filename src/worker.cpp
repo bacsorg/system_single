@@ -208,7 +208,7 @@ bool worker::test(const problem::single::TestGroup &test_group,
         !skip ? test(test_group.process(), test_id, *result.add_test())
               : skip_test(test_id, *result.add_test());
     switch (test_group.tests().continue_condition()) {
-      case problem::single::test::Sequence::ALL:
+      case problem::single::test::Sequence::ALWAYS:
         // ret does not matter
         break;
       case problem::single::test::Sequence::WHILE_OK:
