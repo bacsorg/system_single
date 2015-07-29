@@ -61,7 +61,7 @@ bool worker::test(const problem::single::ProfileExtension &profile) {
 void worker::send_intermediate() {
   m_broker_status.set_code(0);
   m_broker_status.clear_reason();
-  m_broker_status.set_data(bunsan::protobuf::binary::to_string(m_result));
+  m_broker_status.set_data(bunsan::protobuf::binary::to_string(m_intermediate));
   m_channel.send_status(m_broker_status);
 }
 
