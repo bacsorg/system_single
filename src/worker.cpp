@@ -2,6 +2,7 @@
 
 #include <bacs/system/single/error.hpp>
 
+#include <bunsan/log/trivial.hpp>
 #include <bunsan/protobuf/binary.hpp>
 
 #include <boost/algorithm/string/classification.hpp>
@@ -36,17 +37,21 @@ void worker::test(const bacs::process::Buildable &solution,
                           << profile_extension_error::message(
                               "Unable to unpack profile extension"));
   }
+  BUNSAN_LOG_TRACE << "Testing " << profile.DebugString() << " extended with "
+                   << extension.DebugString();
   check_hash() && build(solution) && test(extension);
   send_result();
 }
 
 bool worker::check_hash() {
+  BUNSAN_LOG_TRACE << "Checking hash";
   // TODO
   m_result.mutable_system()->set_status(problem::single::SystemResult::OK);
   return true;
 }
 
 bool worker::build(const bacs::process::Buildable &solution) {
+  BUNSAN_LOG_TRACE << "Building solution";
   m_intermediate.set_state(problem::single::IntermediateResult::BUILDING);
   send_intermediate();
   return m_tester->build(solution, *m_result.mutable_build());
@@ -171,6 +176,7 @@ void worker::test(const problem::single::ProfileExtension &profile,
 
 bool worker::test(const problem::single::TestGroup &test_group,
                   problem::single::TestGroupResult &result) {
+  BUNSAN_LOG_TRACE << "Testing test group = " << test_group.id();
   m_intermediate.set_test_group_id(test_group.id());
   result.set_id(test_group.id());
   result.set_executed(true);
@@ -222,16 +228,17 @@ bool worker::test(const problem::single::TestGroup &test_group,
 bool worker::test(const problem::single::process::Settings &settings,
                   const std::string &test_id,
                   problem::single::TestResult &result) {
+  BUNSAN_LOG_TRACE << "Testing test = " << test_id;
   m_intermediate.set_test_id(test_id);
   send_intermediate();
-  const bool ret =
-      m_tester->test(settings, m_tests->get(test_id), result);
+  const bool ret = m_tester->test(settings, m_tests->get(test_id), result);
   result.set_id(test_id);
   return ret;
 }
 
 bool worker::skip_test(const std::string &test_id,
                        problem::single::TestResult &result) {
+  BUNSAN_LOG_TRACE << "Skipping test = " << test_id;
   m_intermediate.set_test_id(test_id);
   send_intermediate();
   result.set_id(test_id);
