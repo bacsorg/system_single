@@ -106,10 +106,10 @@ void tester_util::add_test_file(const problem::single::process::File &file,
     m_container_solution_files[file.id()] =
         m_container->filesystem().keepInRoot(location);
     const mode_t mode = file::mode(file.permission()) & mask;
-    if (file.has_init()) {
-      copy_test_file(test, file.init(), location, owner_id, mode);
-    } else {
+    if (file.init().empty()) {
       touch_test_file(location, owner_id, mode);
+    } else {
+      copy_test_file(test, file.init(), location, owner_id, mode);
     }
     if (file.has_receive())
       m_receive.push_back({file.id(), location, file.receive()});
