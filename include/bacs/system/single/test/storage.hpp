@@ -46,6 +46,8 @@ class storage::test {
 
   test(storage &storage_, const std::string &test_id);
 
+  const std::string &id() const { return m_test_id; }
+
   void copy(const std::string &data_id,
             const boost::filesystem::path &path) const;
 
