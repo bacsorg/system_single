@@ -1,6 +1,7 @@
 #define BOOST_TEST_MODULE worker
 #include <boost/test/unit_test.hpp>
 
+#include <bacs/system/mock_system_verifier.hpp>
 #include <bacs/system/single/mock_tester.hpp>
 #include <bacs/system/single/test/mock_storage.hpp>
 #include <bacs/system/single/worker.hpp>
@@ -9,11 +10,15 @@
 #include <bunsan/test/test_tools.hpp>
 
 namespace proto = bunsan::protobuf;
-namespace bps = bacs::problem::single;
-namespace bss = bacs::system::single;
+namespace bp = bacs::problem;
+namespace bs = bacs::system;
+namespace bps = bp::single;
+namespace bss = bs::single;
 
 struct worker_fixture {
   bunsan::broker::task::mock_channel channel;
+  std::unique_ptr<bs::mock_system_verifier> system_verifier =
+      std::make_unique<bs::mock_system_verifier>();
   std::unique_ptr<bss::test::mock_storage> tests =
       std::make_unique<bss::test::mock_storage>();
   std::unique_ptr<bss::mock_tester> tester =
@@ -37,17 +42,26 @@ struct worker_fixture {
   };
   std::vector<test_group_context> test_groups;
 
+  bp::System system;
   bacs::process::Buildable solution;
-  bacs::problem::Profile profile;
+  bp::Profile profile;
   bps::ProfileExtension profile_extension;
   bps::process::Settings process;
   bps::TestGroup *test_group = nullptr;
 
   worker_fixture() {
+    system.set_problem_type("test problem");
+    system.set_version("test version");
+    system.set_package("test/package");
     solution.mutable_source()->set_data("solution");
     profile.set_description("mock profile");
     process.mutable_resource_limits()->set_time_limit_millis(1000);
     process.mutable_execution()->add_argument("binary");
+    MOCK_EXPECT(system_verifier->verify)
+        .calls([](const bp::System & /*system*/, bp::SystemResult &result) {
+          result.set_status(bp::SystemResult::OK);
+          return true;
+        });
     MOCK_EXPECT(tests->test_set).calls([this] { return test_set; });
     MOCK_EXPECT(tests->data_set).calls([this] { return data_set; });
   }
@@ -88,7 +102,8 @@ struct worker_fixture {
   }
 
   bss::worker make_worker() {
-    return bss::worker(channel, std::move(tests), std::move(tester));
+    return bss::worker(channel, std::move(system_verifier), std::move(tests),
+                       std::move(tester));
   }
 
   auto expect_intermediate(const bps::IntermediateResult::State state) {
@@ -127,7 +142,7 @@ struct worker_fixture {
       BOOST_CHECK_EQUAL(broker_result.reason(), "");
       const auto result =
           proto::binary::parse_make<bps::Result>(broker_result.data());
-      BOOST_CHECK_EQUAL(result.system().status(), bps::SystemResult::OK);
+      BOOST_CHECK_EQUAL(result.system().status(), bp::SystemResult::OK);
       BOOST_CHECK_EQUAL(result.build().status(),
                         bacs::process::BuildResult::OK);
       BOOST_CHECK_EQUAL(result.build().output(), "build successful");
@@ -177,7 +192,7 @@ BOOST_AUTO_TEST_CASE(build) {
   expect_build().in(s1);
   expect_result().in(s1);
   pack_profile();
-  make_worker().test(solution, profile);
+  make_worker().test(system, solution, profile);
 }
 
 BOOST_AUTO_TEST_CASE(test_ok) {
@@ -194,7 +209,7 @@ BOOST_AUTO_TEST_CASE(test_ok) {
   add_test("1", bps::TestResult::OK);
   add_test("2", bps::TestResult::OK);
   pack_profile();
-  make_worker().test(solution, profile);
+  make_worker().test(system, solution, profile);
 }
 
 BOOST_AUTO_TEST_SUITE_END()  // worker

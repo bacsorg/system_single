@@ -20,16 +20,19 @@ namespace bacs {
 namespace system {
 namespace single {
 
-worker::worker(bunsan::broker::task::channel &channel, test::storage_uptr tests,
+worker::worker(bunsan::broker::task::channel &channel,
+               system_verifier_uptr system_verifier, test::storage_uptr tests,
                tester_uptr tester)
     : m_channel(channel),
+      m_system_verifier(std::move(system_verifier)),
       m_tests(std::move(tests)),
       m_tester(std::move(tester)) {
   m_intermediate.set_state(problem::single::IntermediateResult::INITIALIZED);
   send_intermediate();
 }
 
-void worker::test(const bacs::process::Buildable &solution,
+void worker::test(const problem::System &system,
+                  const bacs::process::Buildable &solution,
                   const problem::Profile &profile) {
   problem::single::ProfileExtension extension;
   if (!profile.extension().UnpackTo(&extension)) {
@@ -39,15 +42,13 @@ void worker::test(const bacs::process::Buildable &solution,
   }
   BUNSAN_LOG_TRACE << "Testing " << profile.DebugString() << " extended with "
                    << extension.DebugString();
-  check_hash() && build(solution) && test(extension);
+  verify_system(system) && build(solution) && test(extension);
   send_result();
 }
 
-bool worker::check_hash() {
-  BUNSAN_LOG_TRACE << "Checking hash";
-  // TODO
-  m_result.mutable_system()->set_status(problem::single::SystemResult::OK);
-  return true;
+bool worker::verify_system(const problem::System &system) {
+  BUNSAN_LOG_TRACE << "Verifying system";
+  return m_system_verifier->verify(system, *m_result.mutable_system());
 }
 
 bool worker::build(const bacs::process::Buildable &solution) {

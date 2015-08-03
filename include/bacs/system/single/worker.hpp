@@ -2,6 +2,7 @@
 
 #include <bacs/system/single/test/storage.hpp>
 #include <bacs/system/single/tester.hpp>
+#include <bacs/system/system_verifier.hpp>
 
 #include <bacs/problem/single/intermediate.pb.h>
 #include <bacs/problem/single/problem.pb.h>
@@ -20,14 +21,16 @@ class worker {
   static const boost::filesystem::path PROBLEM_LIB;
 
  public:
-  worker(bunsan::broker::task::channel &channel, test::storage_uptr tests,
+  worker(bunsan::broker::task::channel &channel,
+         system_verifier_uptr system_verifier, test::storage_uptr tests,
          tester_uptr tester);
 
-  void test(const bacs::process::Buildable &solution,
+  void test(const problem::System &system,
+            const bacs::process::Buildable &solution,
             const problem::Profile &profile);
 
  private:
-  bool check_hash();
+  bool verify_system(const problem::System &system);
 
   bool build(const bacs::process::Buildable &solution);
 
@@ -55,6 +58,7 @@ class worker {
 
  private:
   bunsan::broker::task::channel &m_channel;
+  system_verifier_uptr m_system_verifier;
   test::storage_uptr m_tests;
   tester_uptr m_tester;
   bunsan::broker::Status m_broker_status;
