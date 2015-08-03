@@ -51,8 +51,8 @@ struct worker_fixture {
 
   worker_fixture() {
     system.set_problem_type("test problem");
-    system.set_version("test version");
     system.set_package("test/package");
+    system.set_revision("test revision");
     solution.mutable_source()->set_data("solution");
     profile.set_description("mock profile");
     process.mutable_resource_limits()->set_time_limit_millis(1000);
