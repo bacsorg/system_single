@@ -85,7 +85,6 @@ bool satisfies_requirement(
   using problem::single::Dependency;
   using problem::single::TestResult;
 
-  BOOST_ASSERT(result.has_executed());
   if (!result.executed()) return false;
 
   std::size_t all_number = 0, ok_number = 0, fail_number = 0;
@@ -133,7 +132,7 @@ void worker::test(const problem::single::ProfileExtension &profile,
     r.set_id(test_group.id());
   }
 
-  std::unordered_set<std::string> in_test_group;
+  std::unordered_set<std::string> in_test_group, processed_test_group;
   const std::function<void(const TestGroup &)> run =
       [&](const TestGroup &test_group) {
         if (in_test_group.find(test_group.id()) != in_test_group.end())
@@ -146,7 +145,11 @@ void worker::test(const problem::single::ProfileExtension &profile,
 
         TestGroupResult &result = *results.at(test_group.id());
 
-        if (result.has_executed()) return;
+        if (processed_test_group.find(test_group.id()) !=
+            processed_test_group.end()) {
+          return;
+        }
+        processed_test_group.insert(test_group.id());
 
         for (const Dependency &dependency : test_group.dependency()) {
           const auto iter = test_groups.find(dependency.test_group());
@@ -163,6 +166,8 @@ void worker::test(const problem::single::ProfileExtension &profile,
 
           const TestGroupResult &dep_result =
               *results.at(dependency.test_group());
+          BOOST_ASSERT(processed_test_group.find(dependency.test_group()) !=
+                       processed_test_group.end());
           if (!satisfies_requirement(dep_result, dependency.requirement())) {
             result.set_executed(false);
             return;
