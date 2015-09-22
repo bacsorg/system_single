@@ -61,14 +61,14 @@ int main(std::istream &in, std::ostream &out) {
     auto verifier_plugin =
         system_verifier::load_plugin("lib/bacs_system_system_verifier");
     auto tests_plugin =
-        test::storage::load_plugin("lib/bacs_single_system_test_storage");
+        test::storage::load_plugin("lib/bacs_system_single_test_storage");
     auto checker_mapper_plugin = checker::result_mapper::load_plugin(
-        "lib/bacs_single_system_checker_result_mapper");
+        "lib/bacs_system_single_checker_result_mapper");
     auto checker_plugin =
-        checker::load_plugin("lib/bacs_single_system_checker");
+        checker::load_plugin("lib/bacs_system_single_checker");
     auto tester_mapper_plugin = tester::result_mapper::load_plugin(
-        "lib/bacs_single_system_tester_result_mapper");
-    auto tester_plugin = tester::load_plugin("lib/bacs_single_system_tester");
+        "lib/bacs_system_single_tester_result_mapper");
+    auto tester_plugin = tester::load_plugin("lib/bacs_system_single_tester");
     auto verifier = verifier_plugin.unique_instance();
     auto container =
         Container::create(container_config(ContainerConfig::fromEnvironment()));
