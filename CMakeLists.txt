@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.0)
 
 include(${CMAKE_SOURCE_DIR}/system-config.cmake OPTIONAL)
 
-project(bunsan_bacs_system_single)
+project(bacs_system_single)
 
 if(BunsanCMakeBuiltin)
     BunsanCMakeLoad()
@@ -18,11 +18,11 @@ bunsan_add_library(${PROJECT_NAME}
     src/tester_util.cpp
     src/worker.cpp
 )
-bunsan_use_bunsan_package(${PROJECT_NAME} bunsan_bacs_problem_single
-    bunsan_bacs_problem_single
+bunsan_use_bunsan_package(${PROJECT_NAME} bacs_problem_single
+    bacs_problem_single
 )
-bunsan_use_bunsan_package(${PROJECT_NAME} bunsan_bacs_system
-    bunsan_bacs_system
+bunsan_use_bunsan_package(${PROJECT_NAME} bacs_system
+    bacs_system
 )
 bunsan_use_bunsan_package(${PROJECT_NAME} bunsan_protobuf
     bunsan_protobuf
