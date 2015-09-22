@@ -1,6 +1,6 @@
 #pragma once
 
-#include <bacs/problem/single/process.pb.h>
+#include <bacs/problem/single/process/file.pb.h>
 
 #include <boost/filesystem/path.hpp>
 

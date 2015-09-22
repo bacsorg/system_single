@@ -3,7 +3,7 @@
 #include <bacs/problem/single/problem.pb.h>
 #include <bacs/problem/single/result.pb.h>
 #include <bacs/problem/single/task.pb.h>
-#include <bacs/process.pb.h>
+#include <bacs/process/source.pb.h>
 #include <bacs/system/single/checker.hpp>
 #include <bacs/system/single/test/storage.hpp>
 
