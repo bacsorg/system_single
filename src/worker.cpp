@@ -215,10 +215,12 @@ bool worker::test(const problem::single::TestGroup &test_group,
     std::sort(test_sequence.begin(), test_sequence.end(), less);
   }
   bool skip = false;
+  std::int64_t ok_tests = 0;
   for (const std::string &test_id : test_sequence) {
     const bool ret =
         !skip ? test(test_group.process(), test_id, *result.add_test())
               : skip_test(test_id, *result.add_test());
+    if (ret) ++ok_tests;
     switch (test_group.tests().continue_condition()) {
       case problem::single::test::Sequence::ALWAYS:
         // ret does not matter
@@ -227,6 +229,20 @@ bool worker::test(const problem::single::TestGroup &test_group,
         if (!ret) skip = true;
         break;
     }
+  }
+  // set score
+  switch (test_group.tests().continue_condition()) {
+    case problem::single::test::Sequence::ALWAYS:
+      result.set_score(test_group.score() * ok_tests /
+                       static_cast<std::int64_t>(test_sequence.size()));
+      break;
+    case problem::single::test::Sequence::WHILE_OK:
+      if (skip) {
+        result.set_score(0);
+      } else {
+        result.set_score(test_group.score());
+      }
+      break;
   }
   return true;  // note: empty test group is OK
 }
