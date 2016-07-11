@@ -31,8 +31,8 @@ class storage : private boost::noncopyable {
   virtual std::unordered_set<std::string> test_set() = 0;
 
   std::vector<std::string> test_sequence(
-      const google::protobuf::RepeatedPtrField<
-          problem::single::test::Query> &queries);
+      const google::protobuf::RepeatedPtrField<problem::single::TestQuery>
+          &queries);
 
   test get(const std::string &test_id);
 };

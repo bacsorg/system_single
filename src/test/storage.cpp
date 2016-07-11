@@ -12,11 +12,11 @@ namespace test {
 storage::~storage() {}
 
 std::vector<std::string> storage::test_sequence(
-    const google::protobuf::RepeatedPtrField<problem::single::test::Query> &
-        queries) {
+    const google::protobuf::RepeatedPtrField<problem::single::TestQuery>
+        &queries) {
   const std::unordered_set<std::string> full_set = test_set();
   std::vector<std::string> sequence;
-  for (const problem::single::test::Query &query : queries) {
+  for (const problem::single::TestQuery &query : queries) {
     const problem::single::test::matcher matcher(query);
     sequence.insert(sequence.end(),
                     boost::make_filter_iterator(matcher, full_set.begin()),

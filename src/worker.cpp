@@ -190,10 +190,10 @@ bool worker::test(const problem::single::TestGroup &test_group,
       m_tests->test_sequence(test_group.tests().query());
   std::function<bool(const std::string &, const std::string &)> less;
   switch (test_group.tests().order()) {
-    case problem::single::test::Sequence::IDENTITY:
+    case problem::single::TestSequence::IDENTITY:
       // preserve order
       break;
-    case problem::single::test::Sequence::NUMERIC:
+    case problem::single::TestSequence::NUMERIC:
       less = [](const std::string &left, const std::string &right) {
         return boost::lexical_cast<std::uint64_t>(left) <
                boost::lexical_cast<std::uint64_t>(right);
@@ -207,7 +207,7 @@ bool worker::test(const problem::single::TestGroup &test_group,
                          }),
           test_sequence.end());
       break;
-    case problem::single::test::Sequence::LEXICOGRAPHICAL:
+    case problem::single::TestSequence::LEXICOGRAPHICAL:
       less = std::less<std::string>();
       break;
   }
@@ -222,21 +222,21 @@ bool worker::test(const problem::single::TestGroup &test_group,
               : skip_test(test_id, *result.add_test());
     if (ret) ++ok_tests;
     switch (test_group.tests().continue_condition()) {
-      case problem::single::test::Sequence::ALWAYS:
+      case problem::single::TestSequence::ALWAYS:
         // ret does not matter
         break;
-      case problem::single::test::Sequence::WHILE_OK:
+      case problem::single::TestSequence::WHILE_OK:
         if (!ret) skip = true;
         break;
     }
   }
   // set score
   switch (test_group.tests().continue_condition()) {
-    case problem::single::test::Sequence::ALWAYS:
+    case problem::single::TestSequence::ALWAYS:
       result.set_score(test_group.score() * ok_tests /
                        static_cast<std::int64_t>(test_sequence.size()));
       break;
-    case problem::single::test::Sequence::WHILE_OK:
+    case problem::single::TestSequence::WHILE_OK:
       if (skip) {
         result.set_score(0);
       } else {

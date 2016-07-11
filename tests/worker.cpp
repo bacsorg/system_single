@@ -76,9 +76,9 @@ struct worker_fixture {
     test_group = profile_extension.add_test_group();
     test_group->set_id(id);
     *test_group->mutable_process() = process;
-    test_group->mutable_tests()->set_order(bps::test::Sequence::IDENTITY);
+    test_group->mutable_tests()->set_order(bps::TestSequence::IDENTITY);
     test_group->mutable_tests()->set_continue_condition(
-        bps::test::Sequence::ALWAYS);
+        bps::TestSequence::ALWAYS);
   }
 
   void add_test(const std::string &id, const bps::TestResult::Status status) {

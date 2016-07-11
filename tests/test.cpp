@@ -19,7 +19,7 @@ struct test_fixture {
   }
 
   bss::test::mock_storage tests;
-  google::protobuf::RepeatedPtrField<bps::test::Query> queries;
+  google::protobuf::RepeatedPtrField<bps::TestQuery> queries;
 };
 
 BOOST_FIXTURE_TEST_SUITE(test, test_fixture)
