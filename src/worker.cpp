@@ -133,49 +133,48 @@ void worker::test(const problem::single::ProfileExtension &profile,
   }
 
   std::unordered_set<std::string> in_test_group, processed_test_group;
-  const std::function<void(const TestGroup &)> run =
-      [&](const TestGroup &test_group) {
-        if (in_test_group.find(test_group.id()) != in_test_group.end())
-          BOOST_THROW_EXCEPTION(
-              test_group_circular_dependencies_error()
-              << test_group_circular_dependencies_error::test_group(
-                  test_group.id()));
-        in_test_group.insert(test_group.id());
-        BOOST_SCOPE_EXIT_ALL(&) { in_test_group.erase(test_group.id()); };
+  const std::function<void(const TestGroup &)> run = [&](
+      const TestGroup &test_group) {
+    if (in_test_group.find(test_group.id()) != in_test_group.end())
+      BOOST_THROW_EXCEPTION(
+          test_group_circular_dependencies_error()
+          << test_group_circular_dependencies_error::test_group(
+              test_group.id()));
+    in_test_group.insert(test_group.id());
+    BOOST_SCOPE_EXIT_ALL(&) { in_test_group.erase(test_group.id()); };
 
-        TestGroupResult &result = *results.at(test_group.id());
+    TestGroupResult &result = *results.at(test_group.id());
 
-        if (processed_test_group.find(test_group.id()) !=
-            processed_test_group.end()) {
-          return;
-        }
-        processed_test_group.insert(test_group.id());
+    if (processed_test_group.find(test_group.id()) !=
+        processed_test_group.end()) {
+      return;
+    }
+    processed_test_group.insert(test_group.id());
 
-        for (const Dependency &dependency : test_group.dependency()) {
-          const auto iter = test_groups.find(dependency.test_group());
-          if (iter == test_groups.end())
-            BOOST_THROW_EXCEPTION(
-                test_group_dependency_not_found_error()
-                << test_group_dependency_not_found_error::test_group(
-                       test_group.id())
-                << test_group_dependency_not_found_error::test_group_dependency(
-                       dependency.test_group()));
-          const TestGroup &dep_test_group = *iter->second;
+    for (const Dependency &dependency : test_group.dependency()) {
+      const auto iter = test_groups.find(dependency.test_group());
+      if (iter == test_groups.end())
+        BOOST_THROW_EXCEPTION(
+            test_group_dependency_not_found_error()
+            << test_group_dependency_not_found_error::test_group(
+                   test_group.id())
+            << test_group_dependency_not_found_error::test_group_dependency(
+                   dependency.test_group()));
+      const TestGroup &dep_test_group = *iter->second;
 
-          run(dep_test_group);
+      run(dep_test_group);
 
-          const TestGroupResult &dep_result =
-              *results.at(dependency.test_group());
-          BOOST_ASSERT(processed_test_group.find(dependency.test_group()) !=
-                       processed_test_group.end());
-          if (!satisfies_requirement(dep_result, dependency.requirement())) {
-            result.set_executed(false);
-            return;
-          }
-        }
-        result.set_executed(true);
-        test(test_group, result);
-      };
+      const TestGroupResult &dep_result = *results.at(dependency.test_group());
+      BOOST_ASSERT(processed_test_group.find(dependency.test_group()) !=
+                   processed_test_group.end());
+      if (!satisfies_requirement(dep_result, dependency.requirement())) {
+        result.set_executed(false);
+        return;
+      }
+    }
+    result.set_executed(true);
+    test(test_group, result);
+  };
 
   for (const TestGroup &test_group : profile.test_group()) run(test_group);
 }
