@@ -17,8 +17,11 @@ tester_util_mkdir_hook::tester_util_mkdir_hook(
     const boost::filesystem::path &testing_root) {
   const boost::filesystem::path path =
       container->filesystem().keepInRoot(testing_root);
-  // TODO permissions
   boost::filesystem::create_directories(path);
+  for (boost::filesystem::path i = testing_root; !i.empty();
+       i = i.parent_path()) {
+    container->filesystem().setMode(i, 0755);
+  }
 }
 
 tester_util::tester_util(const ContainerPointer &container,
@@ -37,7 +40,7 @@ void tester_util::reset() {
         bunsan::tempfile::directory_in_directory(m_container_testing_root);
     m_current_root = m_container->filesystem().containerPath(m_tmpdir.path());
     m_container->filesystem().setOwnerId(m_current_root, {0, 0});
-    m_container->filesystem().setMode(m_current_root, 0500);
+    m_container->filesystem().setMode(m_current_root, 0755);
 
     m_process_group = m_container->createProcessGroup();
     m_receive.clear();
@@ -111,8 +114,9 @@ void tester_util::add_test_file(const problem::single::process::File &file,
     } else {
       copy_test_file(test, file.init(), location, owner_id, mode);
     }
-    if (file.has_receive())
+    if (file.has_receive()) {
       m_receive.push_back({file.id(), location, file.receive()});
+    }
   } catch (std::exception &) {
     BOOST_THROW_EXCEPTION(add_test_file_error()
                           << bunsan::enable_nested_current());
